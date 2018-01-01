@@ -1,5 +1,3 @@
-# models.py
-
 class Article():
     """This class represents an article."""
 
@@ -22,6 +20,7 @@ class Article():
             'title': self.title,
         }
 
+
 class Project():
     """This class represents a project."""
 
@@ -41,7 +40,15 @@ class Project():
     def get_screen_url(self, screen):
         return screen.url()
 
-    def serialize(self):
+    def serialize(self, use_short=False):
+        if use_short is True:
+            return {
+                'short_description': self.short_description,
+                'thumbnail': self.thumbnail,
+                'title': self.title,
+                'year': self.year
+            }
+
         return {
             'cover': self.cover,
             'description': self.description,

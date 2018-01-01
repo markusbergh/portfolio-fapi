@@ -1,6 +1,4 @@
-# views.py
-
-from flask import jsonify, abort
+from flask import jsonify, abort, request
 
 # Helpers
 from middleware import app, client
@@ -8,12 +6,14 @@ from middleware import app, client
 # Models
 from models import Article, Project
 
+
 @app.route('/v1/projects/<string:project_id>', methods=['GET'])
 def get_project(project_id):
     project = None
+    list = client.entries({'content_type': 'project', 'sys.id': project_id})
 
-    for item in client.entries({'content_type': 'project', 'sys.id': project_id}):
-        project = Project(id = item.id)
+    for item in list:
+        project = Project(id=item.id)
         project.cover = item.cover.url()
         project.description = item.description
         project.screens = item.screens
@@ -25,15 +25,24 @@ def get_project(project_id):
 
     return jsonify(project.serialize())
 
+
 @app.route('/v1/projects', methods=['GET'])
 def get_projects():
     projects = []
+    list = {}
 
-    for item in client.entries({'content_type': 'project'}):
-        project = Project(id = item.id)
-        project.cover = item.cover.url()
-        project.description = item.description
-        project.screens = item.screens
+    if request.args.get('slug'):
+        list = client.entries({
+            'content_type': 'project',
+            'fields.slug': request.args.get('slug'),
+        })
+    else:
+        list = client.entries({'content_type': 'project'})
+
+    for item in list:
+        project = Project(id=item.id)
+        project.short_description = item.short_description
+        project.thumbnail = item.thumbnail.url()
         project.title = item.title
         project.year = item.year
 
@@ -42,14 +51,16 @@ def get_projects():
     if len(projects) == 0:
         abort(404)
 
-    return jsonify([project.serialize() for project in projects])
+    return jsonify([project.serialize(use_short=True) for project in projects])
+
 
 @app.route('/v1/articles/<string:article_id>', methods=['GET'])
 def get_article(article_id):
     article = None
+    list = client.entries({'content_type': 'article', 'sys.id': article_id})
 
-    for item in client.entries({'content_type': 'article', 'sys.id': article_id}):
-        article = Article(id = item.id)
+    for item in list:
+        article = Article(id=item.id)
         article.body = item.body
         article.category = item.category
         article.cover = item.cover.url()
@@ -61,12 +72,22 @@ def get_article(article_id):
 
     return jsonify(article.serialize())
 
+
 @app.route('/v1/articles', methods=['GET'])
 def get_articles():
     articles = []
+    list = {}
 
-    for item in client.entries({'content_type': 'article'}):
-        article = Article(id = item.id)
+    if request.args.get('slug'):
+        list = client.entries({
+            'content_type': 'article',
+            'fields.slug': request.args.get('slug'),
+        })
+    else:
+        list = client.entries({'content_type': 'article'})
+
+    for item in list:
+        article = Article(id=item.id)
         article.body = item.body
         article.category = item.category
         article.cover = item.cover.url()
