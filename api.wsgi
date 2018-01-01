@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(stream=sys.stderr)
 
-sys.path.append('app/')
+sys.path.append('')
 
 from middleware import app as application
 from middleware import views
