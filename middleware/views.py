@@ -1,19 +1,12 @@
-from flask import Flask
-from flask import jsonify, abort, make_response
+# views.py
 
-import contentful
+from flask import jsonify, abort
 
-from models.article import Article
+# Helpers
+from middleware import app, client
 
-app = Flask(__name__)
-app.config.from_object('config')
-
-# Credentials for Contentful
-spaceId = app.config['SPACE_ID']
-accessToken = app.config['ACCESS_TOKEN']
-
-# Set up client
-client = contentful.Client(spaceId, accessToken)
+# Models
+from models import Article
 
 @app.route('/v1/articles/<string:article_id>', methods=['GET'])
 def get_article(article_id):
@@ -48,6 +41,3 @@ def get_articles():
         abort(404)
 
     return jsonify([article.serialize() for article in articles])
-
-if __name__ == '__main__':
-    app.run()
