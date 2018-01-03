@@ -1,6 +1,5 @@
 from flask import Flask
-
-import contentful
+from contentful import Client
 
 app = Flask(__name__)
 
@@ -11,7 +10,7 @@ spaceId = app.config['SPACE_ID']
 accessToken = app.config['ACCESS_TOKEN']
 
 # Set up client
-client = contentful.Client(spaceId, accessToken)
+client = Client(spaceId, accessToken)
 
 if __name__ == '__main__':
     app.run()
