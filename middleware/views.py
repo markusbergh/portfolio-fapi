@@ -9,11 +9,11 @@ from models import Article, Project
 
 @app.route('/v1/content/front_page', methods=['GET'])
 def get_frontpage():
-    entry = {}
+    content = {}
     request = client.entries({'content_type': 'frontPage', 'include': 3})
     item = request.items[0]
 
-    entry = {
+    content = {
         'title': item.title,
         'introduction': item.introduction,
         'about': {
@@ -39,19 +39,19 @@ def get_frontpage():
     }
 
     for index, item in enumerate(item.footer.items):
-        entry['footer']['items'].append({
+        content['footer']['items'].append({
             'id': item.sys['id'],
             'items': [],
         })
 
         for subitem in item.items:
-            entry['footer']['items'][index]['items'].append({
+            content['footer']['items'][index]['items'].append({
                 'id': subitem.sys['id'],
                 'text': subitem.text,
                 'link': subitem.link,
             })
 
-    return jsonify(entry)
+    return jsonify(content)
 
 
 @app.route('/v1/projects/<string:project_id>', methods=['GET'])
@@ -85,7 +85,10 @@ def get_projects():
             'fields.slug': request.args.get('slug'),
         })
     else:
-        list = client.entries({'content_type': 'project'})
+        list = client.entries({
+            'content_type': 'project',
+            'order': '-fields.year',
+        })
         use_short = True
 
     for item in list:
@@ -139,7 +142,10 @@ def get_articles():
         })
     else:
         use_short = True
-        list = client.entries({'content_type': 'article'})
+        list = client.entries({
+            'content_type': 'article',
+            'order': '-fields.date',
+        })
 
     for item in list:
         article = Article(id=item.id)
